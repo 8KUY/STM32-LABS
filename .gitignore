@@ -42,5 +42,6 @@
 *.idb
 *.pdb
 
+.vscode
 *.crf
 *.Никита
