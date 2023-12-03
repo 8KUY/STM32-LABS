@@ -1,0 +1,8 @@
+--cpu Cortex-M3
+"lab1\startup_stm32f103xb.o"
+"lab1\main.o"
+"lab1\system_stm32f1xx.o"
+--strict --scatter "lab1\lab1.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "lab1.map" -o lab1\lab1.axf
