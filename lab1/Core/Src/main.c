@@ -2,35 +2,34 @@
 
 int main(void)
 {
+  uint32_t * register_adr;
+  uint32_t temp_val; 
 
-  // GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  // __HAL_RCC_GPIOC_CLK_ENABLE();
-  uint32_t tmpreg; 
-  SET_BIT(RCC->APB2ENR, RCC_APB2ENR_IOPCEN);
-  /* Delay after an RCC peripheral clock enabling */
-  tmpreg = READ_BIT(RCC->APB2ENR, RCC_APB2ENR_IOPCEN);
+  // Выставляем бит IOPCEN в регистре RCC_APB2ENR в логическую 1
+  register_adr = (uint32_t *) 0x40021018U;   // 0x40021018 = 0x40021000 + 0x18
+  *register_adr |= 0x10;                     // 0x10 = 0x0001 0000
 
-  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-  CLEAR_BIT(GPIOC->ODR, GPIO_ODR_ODR13);
-  SET_BIT(GPIOC->ODR, GPIO_ODR_ODR14);
-  SET_BIT(GPIOC->ODR, GPIO_ODR_ODR15);
 
-  // GPIO_InitStruct.Pin = GPIO_PIN_13;
-  // GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  // GPIO_InitStruct.Pull = GPIO_NOPULL;
-  // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  // HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  // Считываем значение регистра RCC_APB2ENR
+  temp_val = *register_adr;
 
-  MODIFY_REG(GPIOC->CRH, GPIO_CRH_CNF13 | GPIO_CRH_CNF14 | GPIO_CRH_CNF15, \
-  GPIO_CRH_MODE13_0 | GPIO_CRH_MODE14_0 | GPIO_CRH_MODE15_0);
 
-  
-  SET_BIT(GPIOC->ODR, GPIO_ODR_ODR13);
-  SET_BIT(GPIOC->ODR, GPIO_ODR_ODR14);
-  CLEAR_BIT(GPIOC->ODR, GPIO_ODR_ODR15);
+  // Одновременно установим биты MODE13[0], MODE14[0] и MODE15[0] в логическую 1.
+  GPIOC->CRH |= (GPIO_CRH_MODE13_0 | GPIO_CRH_MODE14_0 | GPIO_CRH_MODE15_0);
 
-  
+  /* 
+  Одновременно установим биты CNF13[0], CNF14[0] и CNF15[0] в логический 0,
+  для этого сначала инвертируем битовые маски, а потом производим операцию логического И.
+  */
+  GPIOC->CRH &= ~(GPIO_CRH_CNF13 | GPIO_CRH_CNF14 | GPIO_CRH_CNF15);
+
+
+  // Одновременно установим биты ODR13 и ODR15 в логическую 1.
+  GPIOC->ODR |= (GPIO_ODR_ODR13 | GPIO_ODR_ODR15);
+
+
+  // После этого перейдем в бесконечное ожидание.
   while (1)
   {
 
