@@ -29,10 +29,36 @@ int main(void)
   GPIOC->ODR |= (GPIO_ODR_ODR13 | GPIO_ODR_ODR15);
 
 
-  // После этого перейдем в бесконечное ожидание.
+  // Выставляем бит IOPBEN в регистре RCC_APB2ENR в логическую 1
+  RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
+
+  // Считываем значение регистра RCC_APB2ENR
+	temp_val = *register_adr;
+
+  // Биты MODE по умолчанию равны 00
+
+  // Одновременно установим биты CNF12 = 10 и CNF13 = 10
+  GPIOB->CRH |= (GPIO_CRH_CNF12_1 | GPIO_CRH_CNF13_1);
+  GPIOB->CRH &= ~(GPIO_CRH_CNF12_0 | GPIO_CRH_CNF13_0);
+
+  // Устанавливаем бит ODR13 в логическую 1
+  GPIOB->ODR |= GPIO_ODR_ODR13;
+
+  // Бесконечный цикл
   while (1)
   {
+    // Проверям бит 12 в регистре GPIOC_IDR
+    if ((GPIOB->IDR) & GPIO_IDR_IDR12) {
+      GPIOC->ODR |= GPIO_ODR_ODR13;
+    };
 
+    // Проверям бит 13 в регистре GPIOC_IDR
+    if ((GPIOB->IDR) & GPIO_IDR_IDR13) {
+      GPIOC->ODR |= GPIO_ODR_ODR15;
+    };
+
+    // Выключаем оба светодиода
+    GPIOC->ODR &= ~(GPIO_ODR_ODR13 | GPIO_ODR_ODR15);
   }
 
 }
